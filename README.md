@@ -125,42 +125,7 @@ Styling buttons
                     align: CENTER
                     text: "Button"
                     text_color: 0xFFFFFF
-                     - button:
-              align: CENTER
-              x: 150
-              width: SIZE_CONTENT
-              height: SIZE_CONTENT
-              radius: 3
-              bg_color: 0x2196F3
-              bg_grad_color: 0x1565C0
-              bg_grad_dir: VER
-              bg_opa: COVER
-              border_width: 2
-              border_color: 0x9E9E9E
-              border_opa: 40%
-              shadow_width: 8
-              shadow_color: 0x9E9E9E
-              shadow_offset_y: 8
-              outline_color: 0x2196F3
-              outline_opa: COVER
-              pad_all: 10
-              pressed:
-                outline_width: 30
-                outline_opa: TRANSP
-                translate_y: 5
-                shadow_offset_y: 3
-                bg_color: 0x1565C0
-                bg_grad_color: 0x0D47A1
-                # Transition on pressed state (linear 300ms like LVGL example)
-                style_transition_time: 300ms
-                style_transition_path: linear
-              on_click:
-                - logger.log: "Styled button clicked"
-              widgets:
-                - label:
-                    align: CENTER
-                    text: "Button"
-                    text_color: 0xFFFFFF   
+   
 ```
 Gummy button
 ```
