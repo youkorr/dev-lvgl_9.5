@@ -88,6 +88,11 @@ lvgl:
           - logger.log: "Long press!"
 ```
 Styling buttons
+
+
+https://github.com/user-attachments/assets/6942a38d-d9b6-4f98-bc6a-74ed1729b7d5
+
+
 ```
           - button:
               align: CENTER
@@ -128,7 +133,15 @@ Styling buttons
    
 ```
 Gummy button
+
+
+https://github.com/user-attachments/assets/6a3e0d82-0da8-4632-83fb-9ec2e769c2fc
+
 ```
+
+
+
+
           - button:
               align: CENTER
               x: 150
