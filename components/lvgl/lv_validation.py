@@ -231,16 +231,14 @@ def color_retmapper(value):
     if isinstance(value, str) and value in COLOR_NAMES:
         value = COLOR_NAMES[value]
     if isinstance(value, int):
-        return literal(
-            f"lv_color_make({(value >> 16) & 0xFF}, {(value >> 8) & 0xFF}, {value & 0xFF})"
-        )
+        return literal(f"lv_color_hex(0x{value:06X})")
     if isinstance(value, ID):
         cval = [x for x in CORE.config[CONF_COLOR] if x[CONF_ID] == value][0]
         if CONF_HEX in cval:
             r, g, b = cval[CONF_HEX]
         else:
             r, g, b, _ = from_rgbw(cval)
-        return literal(f"lv_color_make({r}, {g}, {b})")
+        return literal(f"lv_color_hex(0x{(r << 16) | (g << 8) | b:06X})")
     assert False
 
 
