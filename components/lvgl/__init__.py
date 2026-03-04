@@ -89,6 +89,7 @@ AUTO_LOAD = ["key_provider", "button", "image"]
 CODEOWNERS = ["@youkorr"]  # LVGL 9.5.0 implementation with ThorVG enabled by default
 HELLO_WORLD_FILE = "hello_world.yaml"
 CONF_USE_PPA = "use_ppa"
+CONF_USE_THORVG = "use_thorvg"
 
 
 SIMPLE_TRIGGERS = (
@@ -239,10 +240,14 @@ async def to_code(configs):
     df.add_define("LV_USE_MATRIX", "1")
     # Enable vector graphics support (required for SVG/Lottie)
     df.add_define("LV_USE_VECTOR_GRAPHIC", "1")
-    # Enable ThorVG vector graphics engine (built-in to LVGL v9)
-    df.add_define("LV_USE_THORVG_INTERNAL", "1")
-    # ThorVG optimizations for ESP32
-    df.add_define("LV_VG_LITE_THORVG_16PIXELS_ALIGN", "1")  # Optimize for 16-pixel alignment
+    use_thorvg = config_0.get(CONF_USE_THORVG, True)
+    if use_thorvg:
+        # Enable ThorVG vector graphics engine (built-in to LVGL v9)
+        df.add_define("LV_USE_THORVG_INTERNAL", "1")
+        # ThorVG optimizations for ESP32
+        df.add_define("LV_VG_LITE_THORVG_16PIXELS_ALIGN", "1")  # Optimize for 16-pixel alignment
+        # Enable Lottie animation support (requires ThorVG)
+        df.add_define("LV_USE_LOTTIE", "1")
     # Enable FreeRTOS threading for LVGL draw operations
     # Note: atomic.h shim added in components/lvgl/ for ESP-IDF compatibility
     df.add_define("LV_USE_OS", "LV_OS_FREERTOS")
@@ -256,8 +261,6 @@ async def to_code(configs):
         add_idf_sdkconfig_option("CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES", 2)
     # Enable SVG support (requires ThorVG)
     df.add_define("LV_USE_SVG", "1")
-    # Enable Lottie animation support (requires ThorVG)
-    df.add_define("LV_USE_LOTTIE", "1")
     # Enable advanced image decoders
     df.add_define("LV_USE_LIBPNG", "0")  # PNG support via pngdec (not libpng)
     df.add_define("LV_USE_BMP", "1")      # BMP support
@@ -516,6 +519,7 @@ LVGL_SCHEMA = cv.All(
                 cv.GenerateID(df.CONF_DEFAULT_GROUP): cv.declare_id(lv_group_t),
                 cv.Optional(df.CONF_RESUME_ON_INPUT, default=True): cv.boolean,
                 cv.Optional(CONF_USE_PPA, default=False): cv.boolean,
+                cv.Optional(CONF_USE_THORVG, default=True): cv.boolean,
             }
         )
         .extend(DISP_BG_SCHEMA),
