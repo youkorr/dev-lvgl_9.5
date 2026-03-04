@@ -252,17 +252,20 @@ async def to_code(configs):
         df.add_define("LV_USE_LOTTIE", "1")
         # ESPHome-level define for C++ guards (written to defines.h, available before lvgl.h)
         cg.add_define("USE_LVGL_THORVG")
-    # Enable FreeRTOS threading for LVGL draw operations
-    # Note: atomic.h shim added in components/lvgl/ for ESP-IDF compatibility
-    df.add_define("LV_USE_OS", "LV_OS_FREERTOS")
-    # Draw thread stack size - 48KB for ThorVG rendering
-    df.add_define("LV_DRAW_THREAD_STACK_SIZE", "(48 * 1024)")
-    # LVGL's lv_freertos.c uses xTaskNotifyWaitIndexed(1, ...) which requires
-    # at least 2 notification array entries.  The ESP-IDF default is 1, which
-    # causes undefined behaviour / crash on the draw thread.
-    if CORE.is_esp32:
-        from esphome.components.esp32 import add_idf_sdkconfig_option  # noqa: PLC0415
-        add_idf_sdkconfig_option("CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES", 2)
+        # Enable FreeRTOS threading for LVGL draw operations
+        # Note: atomic.h shim added in components/lvgl/ for ESP-IDF compatibility
+        df.add_define("LV_USE_OS", "LV_OS_FREERTOS")
+        # Draw thread stack size - 48KB for ThorVG rendering
+        df.add_define("LV_DRAW_THREAD_STACK_SIZE", "(48 * 1024)")
+        # LVGL's lv_freertos.c uses xTaskNotifyWaitIndexed(1, ...) which requires
+        # at least 2 notification array entries.  The ESP-IDF default is 1, which
+        # causes undefined behaviour / crash on the draw thread.
+        if CORE.is_esp32:
+            from esphome.components.esp32 import add_idf_sdkconfig_option  # noqa: PLC0415
+            add_idf_sdkconfig_option("CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES", 2)
+    else:
+        # ThorVG disabled — use single-threaded SW renderer, no FreeRTOS draw thread
+        df.add_define("LV_USE_OS", "LV_OS_NONE")
     # Enable advanced image decoders
     df.add_define("LV_USE_LIBPNG", "0")  # PNG support via pngdec (not libpng)
     df.add_define("LV_USE_BMP", "1")      # BMP support
