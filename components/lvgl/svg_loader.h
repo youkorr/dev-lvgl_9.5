@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef USE_ESP32
+#ifdef LV_USE_THORVG_INTERNAL
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -328,4 +329,5 @@ inline bool svg_setup_and_render_file(lv_obj_t *canvas_obj,
 }  // namespace lvgl
 }  // namespace esphome
 
+#endif  // LV_USE_THORVG_INTERNAL
 #endif  // USE_ESP32

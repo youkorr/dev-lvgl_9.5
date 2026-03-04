@@ -234,18 +234,20 @@ async def to_code(configs):
     # ============================================
     # THORVG + SVG/LOTTIE SUPPORT (LVGL v9.5+)
     # ============================================
-    # Enable floating point support (required by matrix)
+    # Enable floating point support (general LVGL feature)
     df.add_define("LV_USE_FLOAT", "1")
-    # Enable matrix support (required by vector graphics)
+    # Enable matrix support (general LVGL feature)
     df.add_define("LV_USE_MATRIX", "1")
-    # Enable vector graphics support (required for SVG/Lottie)
-    df.add_define("LV_USE_VECTOR_GRAPHIC", "1")
     use_thorvg = config_0.get(CONF_USE_THORVG, True)
     if use_thorvg:
+        # Enable vector graphics support (requires ThorVG)
+        df.add_define("LV_USE_VECTOR_GRAPHIC", "1")
         # Enable ThorVG vector graphics engine (built-in to LVGL v9)
         df.add_define("LV_USE_THORVG_INTERNAL", "1")
         # ThorVG optimizations for ESP32
         df.add_define("LV_VG_LITE_THORVG_16PIXELS_ALIGN", "1")  # Optimize for 16-pixel alignment
+        # Enable SVG support (requires ThorVG)
+        df.add_define("LV_USE_SVG", "1")
         # Enable Lottie animation support (requires ThorVG)
         df.add_define("LV_USE_LOTTIE", "1")
     # Enable FreeRTOS threading for LVGL draw operations
@@ -259,8 +261,6 @@ async def to_code(configs):
     if CORE.is_esp32:
         from esphome.components.esp32 import add_idf_sdkconfig_option  # noqa: PLC0415
         add_idf_sdkconfig_option("CONFIG_FREERTOS_TASK_NOTIFICATION_ARRAY_ENTRIES", 2)
-    # Enable SVG support (requires ThorVG)
-    df.add_define("LV_USE_SVG", "1")
     # Enable advanced image decoders
     df.add_define("LV_USE_LIBPNG", "0")  # PNG support via pngdec (not libpng)
     df.add_define("LV_USE_BMP", "1")      # BMP support
