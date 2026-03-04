@@ -250,6 +250,8 @@ async def to_code(configs):
         df.add_define("LV_USE_SVG", "1")
         # Enable Lottie animation support (requires ThorVG)
         df.add_define("LV_USE_LOTTIE", "1")
+        # ESPHome-level define for C++ guards (written to defines.h, available before lvgl.h)
+        cg.add_define("USE_LVGL_THORVG")
     # Enable FreeRTOS threading for LVGL draw operations
     # Note: atomic.h shim added in components/lvgl/ for ESP-IDF compatibility
     df.add_define("LV_USE_OS", "LV_OS_FREERTOS")

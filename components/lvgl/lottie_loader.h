@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef USE_ESP32
-#ifdef LV_USE_THORVG_INTERNAL
+#ifdef USE_LVGL_THORVG
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -396,7 +396,7 @@ inline bool lottie_init(lv_obj_t *obj, const void *data, size_t data_size,
 }  // namespace lvgl
 }  // namespace esphome
 
-#endif  // LV_USE_THORVG_INTERNAL
+#endif  // USE_LVGL_THORVG
 #endif  // USE_ESP32
 
 
