@@ -614,14 +614,18 @@ void LvglComponent::setup() {
   // Rotation will be handled by our drawing function, so reset the display rotation.
   for (auto *disp : this->displays_)
     disp->set_rotation(display::DISPLAY_ROTATION_0_DEGREES);
-  this->show_page(0, LV_SCR_LOAD_ANIM_NONE, 0);
-  lv_display_trigger_activity(this->disp_);
 
-  // CRITICAL: Configure buffers at the VERY END of setup()
-  // This avoids deadlock while ensuring buffers are ready before any callbacks execute
+  // CRITICAL: Configure buffers BEFORE show_page() so that the FreeRTOS draw
+  // thread (spawned by lv_init() when LV_USE_OS=LV_OS_FREERTOS) never attempts
+  // a flush before the display has buffers attached.  The previous ordering
+  // (show_page → set_buffers) caused an immediate render dispatch on the draw
+  // thread that raced with buffer setup and reliably crashed on ESP32-P4.
   lv_display_set_buffers(this->disp_, this->draw_buf_, nullptr, this->buf_bytes_,
                          this->full_refresh_ ? LV_DISPLAY_RENDER_MODE_FULL : LV_DISPLAY_RENDER_MODE_PARTIAL);
   this->buffers_configured_ = true;
+
+  this->show_page(0, LV_SCR_LOAD_ANIM_NONE, 0);
+  lv_display_trigger_activity(this->disp_);
 }
 
 void LvglComponent::update() {
@@ -889,14 +893,16 @@ void *lv_realloc_core(void *ptr, size_t size) {
     return nullptr;
   }
 
-  // CRITICAL: heap_caps_realloc does NOT preserve 64-byte alignment!
-  // We must allocate a new aligned buffer and copy the data
+  // heap_caps_realloc does NOT preserve 64-byte alignment, so we must
+  // allocate a fresh aligned buffer and copy manually.
   void *new_ptr = lv_malloc_core(size);
   if (new_ptr == nullptr)
     return nullptr;
 
-  // Copy data to new buffer (we don't know old size, copy 'size' bytes)
-  memcpy(new_ptr, ptr, size);
+  // Use heap_caps_get_allocated_size() to know the real old block size so we
+  // never read past the end of the original allocation.
+  size_t old_size = heap_caps_get_allocated_size(ptr);
+  memcpy(new_ptr, ptr, old_size < size ? old_size : size);
   lv_free_core(ptr);
 
   return new_ptr;
