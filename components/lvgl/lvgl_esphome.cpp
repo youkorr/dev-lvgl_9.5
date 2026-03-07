@@ -214,9 +214,11 @@ void LvglComponent::draw_buffer_(const lv_area_t *area, lv_color_data *ptr) {
       }
       y1 = x1;
       x1 = this->height_ - area->y1 - height;
-      width = height;
-      height = width;
-      width = height_rounded;
+      {
+        auto orig_width = width;
+        width = height_rounded;
+        height = orig_width;
+      }
       break;
 
     case display::DISPLAY_ROTATION_180_DEGREES:
@@ -586,7 +588,10 @@ void LvglComponent::setup() {
   this->buf_bytes_ = buf_bytes;
   this->rotation = display->get_rotation();
   if (this->rotation != display::DISPLAY_ROTATION_0_DEGREES) {
-    this->rotate_buf_ = static_cast<lv_color_t *>(lv_malloc_core(buf_bytes));  // NOLINT
+    // Allocate extra space for rotation: height_rounded can exceed the area height by up to
+    // (draw_rounding - 1) rows, so the rotated index range exceeds buf_bytes.
+    auto rotate_extra = width * (this->draw_rounding - 1) * LV_COLOR_DEPTH / 8;
+    this->rotate_buf_ = static_cast<lv_color_t *>(lv_malloc_core(buf_bytes + rotate_extra));  // NOLINT
     if (this->rotate_buf_ == nullptr) {
       this->status_set_error(LOG_STR("Memory allocation failure"));
       this->mark_failed();
